@@ -46,6 +46,8 @@ dependencies:
   firebase_messaging: ^14.6.7
   file_picker: ^5.5.0
   flutter_file_downloader: ^1.1.4
+  printing: ^5.11.0
+  http: ^1.1.0
 
 dev_dependencies:
   flutter_test:
