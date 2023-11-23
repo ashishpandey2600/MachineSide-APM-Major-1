@@ -1,12 +1,16 @@
 import 'dart:developer';
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 
 final doc = pw.Document();
 
@@ -120,7 +124,7 @@ Widget showstatus(String id) {
                       title: Text(userMap["pdfurl"].toString()),
                       leading: Text(userMap["pagecount"].toString()),
                       trailing: CupertinoButton(
-                        child: Text("Print"),
+                        child: const Text("Print"),
                         onPressed: () async {
                           // FileDownloader.downloadFile(
                           //     url: userMap["pdfurl"].toString());
@@ -151,14 +155,16 @@ Widget showstatus(String id) {
                           //     return doc;
                           //   },
                           // );
+                          downloadFile(pdfUrl);
+                          // await Printing.layoutPdf(
+                          //   onLayout: (PdfPageFormat format) async {
+                          //     return await http
+                          //         .get(Uri.parse(pdfUrl))
+                          //         .then((response) => response.bodyBytes);
+                          //   },
+                          // );
 
-                           await Printing.layoutPdf(
-                            onLayout: (PdfPageFormat format) async {
-                              return await http
-                                  .get(Uri.parse(pdfUrl))
-                                  .then((response) => response.bodyBytes);
-                            },
-                          );
+                          runPythonScript();
                         },
                       ),
                     );
@@ -173,4 +179,37 @@ Widget showstatus(String id) {
           );
         }
       });
+}
+
+void runPythonScript() async {
+  log("run Python called");
+  final result = await Process.run('python', ['AutoPrint/print1.py']);
+  print(result.stdout);
+  print(result.stderr);
+}
+
+Future<void> downloadFile(String url) async {
+  log("Download File called");
+  final response = await http.get(Uri.parse(url));
+
+  if (response.statusCode == 200) {
+    final Uint8List bytes = response.bodyBytes;
+
+    final appDir = await getApplicationDocumentsDirectory();
+
+    // Use current timestamp to create a unique file name
+    final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+    final fileName = 'downloaded_file_$timestamp.pdf';
+
+    final file = File('${appDir.path}/$fileName');
+
+    await file.writeAsBytes(bytes);
+
+    // Open the file or do whatever you want with it
+    // You might want to use a PDF viewer or display it in your app
+    // For example, you can use the 'open_file' package to open the PDF:
+    // await OpenFile.open(file.path);
+  } else {
+    throw Exception('Failed to load PDF');
+  }
 }

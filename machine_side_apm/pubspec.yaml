@@ -48,6 +48,10 @@ dependencies:
   flutter_file_downloader: ^1.1.4
   printing: ^5.11.0
   http: ^1.1.0
+  flutter_inappwebview: ^5.8.0
+  webview_flutter: ^4.4.1
+  path_provider: ^2.1.1
+  intl: ^0.18.1
 
 dev_dependencies:
   flutter_test:
